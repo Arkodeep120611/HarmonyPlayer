@@ -1,46 +1,113 @@
-# HarmonyPlayer
-A modern offline music player built with Python and PySide6.
+# HarmonyPlayer Web
+
+HarmonyPlayer Web is a Flask music player for music you own or are allowed to use. It provides authentication, uploads, playlists, a persistent HTML5 player, and user-specific settings.
+
 ## Features
-- Open local audio files (`.mp3`, `.wav`, `.flac`, `.ogg`, `.m4a`)
-- Playlist with duplicate prevention
-- Drag & drop files into playlist
-- Double-click to play
-- Play / Pause / Stop / Next / Previous
-- Shuffle + Repeat (`Off`, `All`, `One`)
-- Conditional seek bar (auto-hides when seek unsupported)
-- Save/Load playlist as `.m3u`
-- Remove selected tracks
-- Volume + Mute + Playback Speed (0.5x to 2.0x)
-- Keyboard shortcuts
-- Light/Dark theme toggle
-- Persistent settings via `QSettings`
-- Native menu integration on macOS (About/Quit relocated into the app menu)
-## Keyboard Shortcuts
-- `Space` → Play/Pause
-- `Ctrl + Right` (`Cmd + Right` on macOS) → Next track
-- `Ctrl + Left` (`Cmd + Left` on macOS) → Previous track
-- `Delete` → Remove selected track(s)
-- `Ctrl + M` (`Cmd + M` on macOS) → Mute/Unmute
-- `Ctrl + T` (`Cmd + T` on macOS) → Toggle theme
-- `Ctrl + Q` (`Cmd + Q` on macOS) → Quit
-## Install
-```bash
-pip install PySide6
+
+- Register, login, logout
+- Password hashing
+- Protected user-specific library, playlists, and settings
+- Secure audio uploads
+- HTML5 audio playback
+- Persistent queue
+- Playlist management
+- Client-side search, sort, and filter
+- Dark mode by default with optional light mode
+- Responsive layout for desktop, tablet, and mobile
+
+## Screenshots
+
+Add screenshots here after running the app.
+
+## Requirements
+
+- Python 3.11+ recommended
+- Windows PowerShell
+
+## Installation
+
+### Create a virtual environment
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 ```
 
-### Linux audio codec support
-`pip install PySide6` alone may not be enough for MP3/FLAC/OGG playback on Linux. Install the GStreamer plugins your distro needs, e.g. on Debian/Ubuntu:
-```bash
-sudo apt install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav
+### Install dependencies
+
+```powershell
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-### macOS notes
-Playback uses the native AVFoundation backend. MP3/M4A/WAV are well supported; FLAC/OGG support can vary by macOS/Qt version, so test those formats after install.
-## Run
-```bash
-python main.py
+### Configure environment variables
+
+```powershell
+Copy-Item .env.example .env
 ```
-## Notes
-- Seek bar is shown only when the current media backend reports valid duration/seek support.
-- On some systems/codecs (commonly some FLAC setups), seeking may be unavailable; UI handles this gracefully.
-- The file dialog defaults to your platform's Music folder (`~/Music` on macOS/Linux).
+
+Set these values in `.env`:
+
+- `SECRET_KEY`
+- `DATABASE_URL`
+- `UPLOAD_FOLDER`
+
+## Database initialization
+
+The SQLite database is created automatically on first start. No separate migration step is required for development.
+
+## Running locally
+
+```powershell
+$env:FLASK_DEBUG = "1"
+python app.py
+```
+
+Open `http://127.0.0.1:5000`.
+
+## Uploading music
+
+1. Sign in.
+2. Open Library.
+3. Upload MP3, WAV, OGG, FLAC, or M4A files.
+4. Edit metadata fields when needed.
+
+Uploaded files stay in the local `music/` directory and are only accessible to the owning user.
+
+## Project structure
+
+```text
+HarmonyPlayer-Web/
+├── app.py
+├── config.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+├── .env.example
+├── instance/
+├── app/
+├── templates/
+├── static/
+└── music/
+```
+
+## Security notes
+
+- Passwords are hashed with Werkzeug.
+- CSRF protection is enabled for state-changing requests.
+- Uploaded filenames are sanitized.
+- Path traversal is blocked.
+- Only owners can access songs and playlists.
+- Secrets come from environment variables.
+
+## Deployment considerations
+
+- Use a strong production `SECRET_KEY`.
+- Store the database and uploads on durable storage.
+- Prefer PostgreSQL for production scale.
+- Put the app behind HTTPS and a reverse proxy.
+- Consider moving `UPLOAD_FOLDER` outside the source tree.
+
+## License
+
+No license has been chosen yet.

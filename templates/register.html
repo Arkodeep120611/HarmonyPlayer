@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block public_content %}
+<section class="auth-layout">
+  <div class="auth-copy">
+    <div class="eyebrow">HarmonyPlayer</div>
+    <h1>Create your account</h1>
+    <p>Build your private listening space.</p>
+  </div>
+  <form class="auth-form panel" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <label for="{{ form.username.id }}">Username</label>
+    {{ form.username(class="input") }}
+    {% for error in form.username.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+
+    <label for="{{ form.password.id }}">Password</label>
+    {{ form.password(class="input") }}
+    {% for error in form.password.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+
+    <label for="{{ form.confirm_password.id }}">Confirm password</label>
+    {{ form.confirm_password(class="input") }}
+    {% for error in form.confirm_password.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+
+    {{ form.submit(class="button button-primary button-block") }}
+    <p class="auth-note">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+  </form>
+</section>
+{% endblock %}

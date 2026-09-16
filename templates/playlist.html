@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-grid">
+  {% if mode == "index" %}
+    <div class="page-header panel">
+      <div>
+        <div class="eyebrow">Playlists</div>
+        <h2>Your playlists</h2>
+        <p>Create collections and open them to manage tracks.</p>
+      </div>
+    </div>
+    <section class="panel">
+      <form method="post" class="inline-form">
+        {{ form.hidden_tag() }}
+        {{ form.name(class="input", placeholder="New playlist name") }}
+        {{ form.submit(class="button button-primary") }}
+      </form>
+    </section>
+    <section class="card-grid">
+      {% for playlist in playlists %}
+        <article class="panel card">
+          <div class="card-body">
+            <div class="artwork artwork-small"><span>{{ playlist.name[:2] | upper }}</span></div>
+            <div>
+              <h3>{{ playlist.name }}</h3>
+              <p>{{ playlist.song_count }} track{{ 's' if playlist.song_count != 1 else '' }}</p>
+            </div>
+          </div>
+          <div class="button-row">
+            <a class="button button-secondary" href="{{ url_for('main.playlist_detail', playlist_id=playlist.id) }}">Open</a>
+          </div>
+        </article>
+      {% else %}
+        <div class="empty-state panel">
+          <h3>No playlists yet</h3>
+          <p>Create your first playlist above.</p>
+        </div>
+      {% endfor %}
+    </section>
+  {% else %}
+    <div class="page-header panel">
+      <div>
+        <div class="eyebrow">Playlist</div>
+        <h2>{{ playlist.name }}</h2>
+        <p>{{ playlist.song_count }} track{{ 's' if playlist.song_count != 1 else '' }}</p>
+      </div>
+      <div class="button-row">
+        <button class="button button-primary" id="playlist-play-btn" type="button">Play</button>
+        <button class="button button-secondary" id="playlist-shuffle-btn" type="button">Shuffle</button>
+        <button class="button button-secondary" id="playlist-rename-btn" type="button">Rename</button>
+        <button class="button button-danger" id="playlist-delete-btn" type="button">Delete</button>
+      </div>
+    </div>
+
+    <section class="panel">
+      <h3>Add songs</h3>
+      <div class="select-grid">
+        <select id="playlist-song-picker" class="input" multiple size="8" aria-label="Select songs to add">
+          {% for song in available_songs %}
+            <option value="{{ song.id }}">{{ song.title }} — {{ song.artist }}</option>
+          {% endfor %}
+        </select>
+        <button class="button button-primary" id="playlist-add-songs-btn" type="button">Add selected</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Songs in this playlist</h3>
+      <div class="playlist-list" id="playlist-song-list"></div>
+    </section>
+  {% endif %}
+</section>
+
+<script id="playlist-page-data" type="application/json">{{ playlist | default({}, true) | tojson }}</script>
+<script id="playlist-list-data" type="application/json">{{ playlists | default([], true) | tojson }}</script>
+<script id="playlist-available-data" type="application/json">{{ available_songs | default([], true) | tojson }}</script>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/playlists.js') }}" defer></script>
+{% endblock %}

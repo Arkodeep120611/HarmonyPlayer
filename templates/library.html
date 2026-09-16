@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-grid">
+  <div class="page-header panel">
+    <div>
+      <div class="eyebrow">Library</div>
+      <h2>{{ song_count }} track{{ 's' if song_count != 1 else '' }}</h2>
+      <p>Search, sort, filter, and play your private library.</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-label">Songs</span>
+        <strong>{{ song_count }}</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Playlists</span>
+        <strong>{{ playlist_count }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <input id="library-search" class="input" type="search" placeholder="Search title, artist, or album" aria-label="Search library">
+      <select id="library-sort" class="input">
+        <option value="recent">Recently added</option>
+        <option value="title">Title</option>
+        <option value="artist">Artist</option>
+        <option value="album">Album</option>
+        <option value="duration">Duration</option>
+      </select>
+      <select id="library-filter-artist" class="input">
+        <option value="">All artists</option>
+      </select>
+      <select id="library-filter-album" class="input">
+        <option value="">All albums</option>
+      </select>
+    </div>
+  </div>
+
+  <section class="panel upload-panel">
+    <div class="panel-heading">
+      <div>
+        <h3>Upload music</h3>
+        <p>Upload audio you own or are allowed to use.</p>
+      </div>
+    </div>
+    <form id="upload-form" action="{{ url_for('main.upload') }}" method="post" enctype="multipart/form-data" class="form-grid">
+      {{ upload_form.hidden_tag() }}
+      <label>
+        <span>Title</span>
+        {{ upload_form.title(class="input", placeholder="Song title") }}
+      </label>
+      <label>
+        <span>Artist</span>
+        {{ upload_form.artist(class="input", placeholder="Artist name") }}
+      </label>
+      <label>
+        <span>Album</span>
+        {{ upload_form.album(class="input", placeholder="Album name") }}
+      </label>
+      <label class="file-field">
+        <span>File</span>
+        {{ upload_form.file(class="input") }}
+      </label>
+      {{ upload_form.submit(class="button button-primary") }}
+    </form>
+    <div class="field-note" id="upload-status" aria-live="polite"></div>
+  </section>
+
+  <section class="library-grid" id="library-grid" aria-live="polite"></section>
+  <div class="empty-state panel" id="library-empty" hidden>
+    <h3>No songs yet</h3>
+    <p>Upload your first track to start listening.</p>
+  </div>
+</section>
+
+<dialog class="dialog" id="playlist-dialog">
+  <form method="dialog" class="dialog-card panel">
+    <h3>Add to playlist</h3>
+    <p id="playlist-dialog-song"></p>
+    <label>
+      <span>Playlist</span>
+      <select id="playlist-target" class="input"></select>
+    </label>
+    <div class="button-row">
+      <button class="button button-secondary" value="cancel">Cancel</button>
+      <button id="playlist-dialog-save" class="button button-primary" value="default">Add</button>
+    </div>
+  </form>
+</dialog>
+
+<script id="library-data" type="application/json">{{ songs | tojson }}</script>
+<script id="library-playlists" type="application/json">{{ playlists | tojson }}</script>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/library.js') }}" defer></script>
+{% endblock %}

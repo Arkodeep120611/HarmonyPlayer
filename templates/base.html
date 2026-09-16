@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-theme="{{ current_settings.theme if current_user.is_authenticated else 'dark' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{{ page_title or "HarmonyPlayer" }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script>
+    window.HarmonyPlayer = window.HarmonyPlayer || {};
+    window.HarmonyPlayer.config = {
+      csrfToken: "{{ csrf_token() }}",
+      apiBase: "/api",
+      currentUser: {{ current_user_payload | tojson }},
+      settings: {{ current_settings | tojson }}
+    };
+    window.HarmonyPlayer.pageData = {{ page_data | default({}, true) | tojson }};
+  </script>
+</head>
+<body class="{{ 'app-shell' if current_user.is_authenticated else 'public-shell' }}">
+  {% if current_user.is_authenticated %}
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">H</div>
+        <div>
+          <div class="brand-name">HarmonyPlayer</div>
+          <div class="brand-tagline">Your music. Your way.</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
+        <a href="{{ url_for('main.library') }}" class="nav-link">Library</a>
+        <a href="{{ url_for('main.playlists') }}" class="nav-link">Playlists</a>
+        <a href="{{ url_for('main.settings') }}" class="nav-link">Settings</a>
+      </nav>
+      <div class="sidebar-card">
+        <div class="sidebar-label">Signed in as</div>
+        <div class="sidebar-username">{{ current_user.username }}</div>
+        <form action="{{ url_for('auth.logout') }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="button button-secondary button-block" type="submit">Logout</button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="overlay" id="sidebarOverlay"></div>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">☰</button>
+        <div>
+          <div class="topbar-eyebrow">{{ current_user.username }}</div>
+          <h1 class="topbar-title">{{ page_title or "HarmonyPlayer" }}</h1>
+        </div>
+        <button class="icon-button" type="button" data-theme-toggle aria-label="Toggle theme">◐</button>
+      </header>
+
+      <main class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack" aria-live="polite">
+              {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                  <span>{{ message }}</span>
+                  <button type="button" class="flash-dismiss" aria-label="Dismiss message">×</button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
+    <section class="player-dock" aria-label="Audio player">
+      <div class="player-now-playing">
+        <div class="artwork" id="player-artwork" aria-hidden="true"><span>♪</span></div>
+        <div>
+          <div class="player-label">Now playing</div>
+          <div class="player-title" id="player-track-title">Nothing selected</div>
+          <div class="player-subtitle" id="player-track-meta">Add a song from your library.</div>
+        </div>
+      </div>
+
+      <div class="player-transport">
+        <div class="transport-row">
+          <button class="icon-button" id="player-prev-btn" type="button" aria-label="Previous track">⏮</button>
+          <button class="icon-button icon-button-primary" id="player-play-btn" type="button" aria-label="Play or pause">▶</button>
+          <button class="icon-button" id="player-next-btn" type="button" aria-label="Next track">⏭</button>
+          <button class="icon-button" id="player-shuffle-btn" type="button" aria-label="Toggle shuffle">⇄</button>
+          <button class="icon-button" id="player-repeat-btn" type="button" aria-label="Toggle repeat">↻</button>
+        </div>
+        <div class="seek-row">
+          <span id="player-current-time">00:00</span>
+          <input id="player-seek" type="range" min="0" max="1000" value="0" aria-label="Seek">
+          <span id="player-total-time">00:00</span>
+        </div>
+      </div>
+
+      <div class="player-side">
+        <label class="control-label" for="player-volume">Volume</label>
+        <input id="player-volume" type="range" min="0" max="100" value="{{ current_settings.volume if current_user.is_authenticated else 70 }}" aria-label="Volume">
+        <div class="inline-controls">
+          <button class="button button-secondary" id="player-mute-btn" type="button">Mute</button>
+          <label class="control-label" for="player-speed">Speed</label>
+          <select id="player-speed" aria-label="Playback speed">
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="player-queue">
+        <div class="queue-header">
+          <strong>Queue</strong>
+          <button class="button button-secondary button-small" id="player-clear-queue-btn" type="button">Clear</button>
+        </div>
+        <div class="queue-list" id="player-queue-list" aria-label="Playback queue"></div>
+      </div>
+
+      <audio id="player-audio" preload="metadata"></audio>
+    </section>
+  </div>
+  {% else %}
+  <div class="public-shell-wrap">
+    <main class="public-card">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack" aria-live="polite">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">
+                <span>{{ message }}</span>
+                <button type="button" class="flash-dismiss" aria-label="Dismiss message">×</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block public_content %}{% endblock %}
+    </main>
+  </div>
+  {% endif %}
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/player.js') }}" defer></script>
+    {% block page_scripts %}{% endblock %}
+  {% endif %}
+</body>
+</html>

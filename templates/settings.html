@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-grid">
+  <div class="page-header panel">
+    <div>
+      <div class="eyebrow">Settings</div>
+      <h2>Account and playback</h2>
+      <p>Adjust your theme, volume, and playback speed.</p>
+    </div>
+  </div>
+
+  <form method="post" class="panel form-grid">
+    {{ form.hidden_tag() }}
+    <label>
+      <span>Theme</span>
+      {{ form.theme(class="input") }}
+    </label>
+    <label>
+      <span>Volume</span>
+      {{ form.volume(class="input", min="0", max="100") }}
+    </label>
+    <label>
+      <span>Playback speed</span>
+      {{ form.playback_speed(class="input", step="0.1", min="0.5", max="2.0") }}
+    </label>
+    {{ form.submit(class="button button-primary") }}
+  </form>
+
+  <section class="panel account-panel">
+    <h3>Account information</h3>
+    <dl class="definition-list">
+      <div><dt>Username</dt><dd>{{ account.username }}</dd></div>
+      <div><dt>Joined</dt><dd>{{ account.created_at.strftime('%Y-%m-%d') if account.created_at else '—' }}</dd></div>
+      <div><dt>Theme</dt><dd>{{ settings.theme }}</dd></div>
+    </dl>
+    <form action="{{ url_for('auth.logout') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="button button-secondary" type="submit">Logout</button>
+    </form>
+  </section>
+</section>
+{% endblock %}
