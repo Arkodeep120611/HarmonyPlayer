@@ -315,7 +315,48 @@ class MusicPlayerWindow(QMainWindow):
             self.theme_button.setText("Theme: Dark")
             self.set_status("Dark theme enabled")
         else:
-            self.setStyleSheet("")
+            self.setStyleSheet(
+                """
+                QMainWindow, QWidget {
+                    background-color: #f5f5f5;
+                    color: #202020;
+                }
+                QPushButton {
+                    background-color: #e6e6e6;
+                    color: #202020;
+                    border: 1px solid #b5b5b5;
+                    padding: 6px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #dcdcdc;
+                }
+                QListWidget {
+                    background-color: #ffffff;
+                    color: #202020;
+                    border: 1px solid #b5b5b5;
+                }
+                QSlider::groove:horizontal {
+                    height: 6px;
+                    background: #c7c7c7;
+                    border-radius: 3px;
+                }
+                QSlider::handle:horizontal {
+                    background: #5a5a5a;
+                    width: 12px;
+                    margin: -4px 0;
+                    border-radius: 6px;
+                }
+                QMenuBar, QMenu {
+                    background-color: #ececec;
+                    color: #202020;
+                }
+                QStatusBar {
+                    background-color: #ececec;
+                    color: #202020;
+                }
+                """
+            )
             self.theme_button.setText("Theme: Light")
             self.set_status("Light theme enabled")
 
